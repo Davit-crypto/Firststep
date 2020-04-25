@@ -3,10 +3,11 @@
 properties([disableConcurrentBuilds()])
 
 pipeline {
-    agent { 
-        label 'master'
+    agent {        
+      label 'master'
+        triggers { pollSCM('* * * * *') }
        }
-    options {
+      options {
         buildDiscarder(logRotator(numToKeepStr: '10', artifactNumToKeepStr: '10'))
         timestamps()
     }
