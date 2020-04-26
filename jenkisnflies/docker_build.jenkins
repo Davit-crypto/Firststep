@@ -36,4 +36,5 @@ pipeline {
                docker push 121314151617181920:/toolbox:latest
                '''
               }
-}
+            }
+        }
