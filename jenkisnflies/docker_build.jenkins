@@ -3,38 +3,40 @@
 properties([disableConcurrentBuilds()])
 
 pipeline {
-    agent {        
-      label 'master'      
-      }
-    triggers { pollSCM('* * * * *') }  
+    agent { 
+        label 'master'
+        }
+    triggers { pollSCM('* * * * *') }
     options {
         buildDiscarder(logRotator(numToKeepStr: '10', artifactNumToKeepStr: '10'))
         timestamps()
     }
     stages {
         stage("docker login") {
-            echo"==============Docker Login=============="
-            withCredentials([usernamePassword(credentialsId: '121314151617181920', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
-                sh """
-                docker login -u $USERNAME -p $PASSWORD
-                """
-            }
-        }
-    }
-       stage("create docker image") {
             steps {
-                echo " ============== start building image =================="
-                dir ('docker/') {
-                	sh 'docker build -t 121314151617181920/toolbox:latest .'
+                echo " ============== docker login =================="
+                withCredentials([usernamePassword(credentialsId: '121314151617181920', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+                    sh """
+                    docker login -u $USERNAME -p $PASSWORD
+                    """
                 }
             }
         }
-    stage ("docker push") {
-        steps {
-            echo "================Start pushing image============="
-               sh '''
-               docker push 121314151617181920:/toolbox:latest
-               '''
-              }
+        stage("create docker image") {
+            steps {
+                echo " ============== start building image =================="
+                dir ('docker/toolbox') {
+                	sh 'docker build -t semaev/toolbox:latest . '
+                }
             }
         }
+        stage("docker push") {
+            steps {
+                echo " ============== start pushing image =================="
+                sh '''
+                docker push semaev/toolbox:latest
+                '''
+            }
+        }
+    }
+}
